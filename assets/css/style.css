@@ -106,3 +106,91 @@ footer .text-center {
     padding-top: 1.5rem !important;
     padding-bottom: 1.5rem !important;
 }
+
+/* Hero Image Section */
+.hero-image {
+    position: relative;
+    background-image: url('../images/patriotic-bg.jpg'); /* Path to your background image */
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed; /* For parallax effect */
+    height: 100vh;
+    width: 100%;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: rgba(0, 106, 78, 0.7); /* Bangladeshi Green with transparency */
+}
+
+.hero-content {
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #ffffff;
+    padding: 0 20px;
+}
+
+.hero-content h1 {
+    font-size: 3rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.hero-content p {
+    font-size: 1.5rem;
+    margin-bottom: 30px;
+}
+
+.btn-primary {
+    background-color: #f42a41; /* Bangladeshi Red */
+    border-color: #f42a41;
+}
+
+.btn-outline-light {
+    border-color: #ffffff;
+    color: #ffffff;
+}
+
+.btn-outline-light:hover {
+    background-color: #ffffff;
+    color: #006a4e;
+}
+
+@media (max-width: 767px) {
+    .hero-content h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero-content p {
+        font-size: 1.25rem;
+    }
+}
+
+/* Features Section */
+.features {
+    background-color: #ffffff;
+}
+
+.features h3 {
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 15px;
+}
+
+.features p {
+    color: #555555;
+}
+
+.features i {
+    color: #006a4e; /* Bangladeshi Green */
+}
+
+.features .col-md-4 {
+    margin-bottom: 30px;
+}
