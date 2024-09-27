@@ -1,10 +1,12 @@
 <?php
+// Include configuration file and start session
+include '../../includes/config.php';
 session_start();
-include 'config.php';
 
 // Check if the user is logged in
-if (!isset($_SESSION['user'])) {
-    header("Location: login.php");
+if (!isset($_SESSION['user_id'])) {
+    // Redirect to login page if user is not logged in
+    header("Location: " . $base_url . "/views/auth/login.php");
     exit();
 }
 
@@ -14,19 +16,23 @@ $issues_result = mysqli_query($conn, $issue_query);
 
 // Process the form for proposing a solution
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Sanitize and get form data
     $issue_id = mysqli_real_escape_string($conn, $_POST['issue']);
     $solution_title = mysqli_real_escape_string($conn, $_POST['title']);
     $solution_description = mysqli_real_escape_string($conn, $_POST['description']);
-    $submitted_by = $_SESSION['user'];  // Get username from session
+    $submitted_by = $_SESSION['user_id'];  // Get user ID from session
 
+    // Prepare and execute the insert query
     $insert_query = "INSERT INTO Solution (IssueID, Title, Description, DateSubmitted, SubmittedBy) 
-                     VALUES ('$issue_id', '$solution_title', '$solution_description', NOW(), 
-                     (SELECT UserID FROM User WHERE Username = '$submitted_by'))";
+                     VALUES ('$issue_id', '$solution_title', '$solution_description', NOW(), '$submitted_by')";
 
     if (mysqli_query($conn, $insert_query)) {
-        echo "Solution proposed successfully!";
+        // Redirect to profile page after successful submission
+        header("Location: " . $base_url . "/views/user/profile.php");
+        exit();
     } else {
-        echo "Error proposing solution.";
+        // Display error message if insertion fails
+        $error_message = "Error proposing solution.";
     }
 }
 ?>
@@ -41,15 +47,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </head>
 <body class="bg-gray-100 text-gray-800">
 
-    <!-- Navbar -->
-    <?php include 'templates/navbar.php'; ?>
+    <!-- Include header/navbar -->
+    <?php include $base_url . '/views/templates/header.php'; ?>
 
     <!-- Propose a Solution Form -->
     <div class="container mx-auto py-16">
         <div class="bg-white p-8 rounded-lg shadow-lg max-w-md mx-auto">
             <h1 class="text-3xl font-bold text-green-700 mb-6">Propose a Solution</h1>
 
-            <form action="propose_solution.php" method="POST">
+            <!-- Display error message if set -->
+            <?php if (isset($error_message)): ?>
+                <p class="text-red-500 mb-4"><?php echo $error_message; ?></p>
+            <?php endif; ?>
+
+            <form action="<?php echo $base_url; ?>/views/issues/propose_solution.php" method="POST">
                 <div class="mb-4">
                     <label for="issue" class="block text-gray-700">Select Issue</label>
                     <select id="issue" name="issue" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" required>
@@ -71,8 +82,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
     </div>
 
-    <!-- Footer -->
-    <?php include 'templates/footer.php'; ?>
+    <!-- Include footer -->
+    <?php include $base_url . '/views/templates/footer.php'; ?>
 
 </body>
 </html>

@@ -1,8 +1,9 @@
 <?php
+// Start the session and include the configuration file
 session_start();
 include '../../includes/config.php';
 
-// Fetch emergency reports from the database
+// Fetch emergency reports from the database, ordered by submission date (most recent first)
 $query = "SELECT Title, Description, Type, Location, DateSubmitted FROM EmergencyPost ORDER BY DateSubmitted DESC";
 $result = mysqli_query($conn, $query);
 ?>
@@ -17,6 +18,7 @@ $result = mysqli_query($conn, $query);
     <!-- Tailwind CSS CDN -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
+        /* Add hover effect to emergency containers */
         .emergency-container:hover {
             transform: scale(1.05);
             transition: transform 0.3s ease;
@@ -24,7 +26,7 @@ $result = mysqli_query($conn, $query);
     </style>
 </head>
 <style>
-
+    /* Set background image and styles for the body */
     body {
         background-image: url('/assets/images/emergency_post.png');
         background-size: cover;
@@ -32,13 +34,11 @@ $result = mysqli_query($conn, $query);
         background-attachment: fixed;
         background-repeat: no-repeat;
         background-color: #f4f4f4;
-
     }
-  
 </style>
 
 <body class="bg-gray-100">
-    <!-- Navbar -->
+    <!-- Include the header/navbar -->
     <?php include '../templates/header.php'; ?>
 
     <!-- Main Content Container -->
@@ -48,6 +48,7 @@ $result = mysqli_query($conn, $query);
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <?php if (mysqli_num_rows($result) > 0): ?>
                 <?php while ($emergency = mysqli_fetch_assoc($result)): ?>
+                    <!-- Display each emergency report -->
                     <div style="opacity: 0.9;" class="emergency-container bg-white rounded-lg shadow-lg p-6 transition-transform">
                         <h2 class="text-2xl font-bold text-red-600 mb-2"><?php echo $emergency['Title']; ?></h2>
                         <p class="text-gray-700 mb-4"><?php echo $emergency['Description']; ?></p>
@@ -59,12 +60,14 @@ $result = mysqli_query($conn, $query);
                     </div>
                 <?php endwhile; ?>
             <?php else: ?>
+                <!-- Display message if no emergency reports are available -->
                 <p class="text-gray-700 text-center col-span-full">No emergency reports available.</p>
             <?php endif; ?>
         </div>
     </div>
 
     <script>
+        // Function to copy the post link to clipboard
         function copyLinkToClipboard(element, link) {
             navigator.clipboard.writeText(link);
             element.innerText = "Copied!";
@@ -74,7 +77,7 @@ $result = mysqli_query($conn, $query);
         }
     </script>
 
-    <!-- Footer -->
+    <!-- Include the footer -->
     <?php include '../templates/footer.php'; ?>
 </body>
 

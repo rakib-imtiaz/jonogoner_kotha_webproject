@@ -1,4 +1,5 @@
 <?php
+// Start the session and include the configuration file
 session_start();
 include '../../includes/config.php';
 
@@ -21,7 +22,7 @@ while ($row = mysqli_fetch_assoc($result)) {
     $polls[$row['PollID']]['DateCreated'] = $row['DateCreated'];
     $polls[$row['PollID']]['TotalVotes'] = $row['TotalVotes'];
     $polls[$row['PollID']]['Options'][] = [
-        'OptionID' => $row['OptionID'], 
+        'OptionID' => $row['OptionID'],
         'OptionText' => $row['OptionText'],
         'Votes' => $row['Votes']
     ];
@@ -30,6 +31,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -42,6 +44,7 @@ while ($row = mysqli_fetch_assoc($result)) {
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
+
         .poll-option {
             cursor: pointer;
             transition: background-color 0.3s ease;
@@ -49,14 +52,17 @@ while ($row = mysqli_fetch_assoc($result)) {
             justify-content: space-between;
             align-items: center;
         }
+
         .poll-option:hover {
             background-color: #f0f0f0;
         }
+
         .message {
             font-size: 1rem;
             color: red;
             margin-top: 10px;
         }
+
         .percentage {
             font-weight: bold;
             color: gray;
@@ -90,7 +96,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                 <p class="text-sm text-gray-600 mb-4">Created on: <?php echo date('Y-m-d', strtotime($poll['DateCreated'])); ?></p>
 
                 <form class="poll-form" data-poll-id="<?php echo $pollID; ?>">
-                    <?php foreach ($poll['Options'] as $option): 
+                    <?php foreach ($poll['Options'] as $option):
                         $percentage = ($poll['TotalVotes'] > 0) ? round(($option['Votes'] / $poll['TotalVotes']) * 100) : 0;
                     ?>
                         <div class="poll-option p-2 border mb-2 rounded-lg" data-option-id="<?php echo $option['OptionID']; ?>">
@@ -139,11 +145,15 @@ while ($row = mysqli_fetch_assoc($result)) {
                             optionID: selectedOption
                         },
                         success: function(response) {
-                            if (response.success) {
-                                alert('Vote submitted successfully!');
+                            var result = JSON.parse(response);
+                            if (result.success) {
+                                alert(result.message);
                                 fetchPollResults(pollID);
+                                // Disable the form to prevent multiple votes
+                                $('form[data-poll-id="' + pollID + '"]').find('input[type="radio"]').prop('disabled', true);
+                                $('form[data-poll-id="' + pollID + '"]').find('button[type="submit"]').prop('disabled', true);
                             } else {
-                                alert('Failed to submit vote.');
+                                alert(result.message);
                             }
                         }
                     });
@@ -152,28 +162,32 @@ while ($row = mysqli_fetch_assoc($result)) {
                 }
             });
 
-        function fetchPollResults(pollID) {
-    $.ajax({
-        url: 'fetch_poll_results.php',
-        method: 'GET',
-        data: {
-            pollID: pollID
-        },
-        success: function(response) {
-            var pollResultDiv = $('form[data-poll-id="' + pollID + '"]').siblings('.poll-result');
-            var resultHTML = '';
+            // Function to fetch and display poll results
+            function fetchPollResults(pollID) {
+                $.ajax({
+                    url: 'fetch_poll_results.php',
+                    method: 'GET',
+                    data: {
+                        pollID: pollID
+                    },
+                    success: function(response) {
+                        var pollResultDiv = $('form[data-poll-id="' + pollID + '"]').siblings('.poll-result');
+                        var resultHTML = '';
 
-            $.each(response.results, function(optionID, data) {
-                var percentage = (data.votes / response.totalVotes) * 100;
-                resultHTML += '<p>' + data.optionText + ': ' + percentage.toFixed(2) + '%</p>';
-            });
+                        $.each(response.results, function(optionID, data) {
+                            var percentage = (data.votes / response.totalVotes) * 100;
+                            resultHTML += '<p>' + data.optionText + ': ' + percentage.toFixed(2) + '%</p>';
+                        });
 
-            pollResultDiv.find('.results').html(resultHTML);
-            pollResultDiv.removeClass('hidden');
-        }
-    });
-}
+                        pollResultDiv.find('.results').html(resultHTML);
+                        pollResultDiv.removeClass('hidden');
+                    }
+                });
+            }
+        });
+    </script>
 
 
 </body>
+
 </html>

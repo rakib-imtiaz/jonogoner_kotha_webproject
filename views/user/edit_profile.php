@@ -1,38 +1,40 @@
 <?php
 session_start();
-include 'config.php';
+include '../../includes/config.php';
 
-// Check if the user is logged in
-if (!isset($_SESSION['user'])) {
-    header("Location: login.php");
+// Check if the user is logged in and has the 'User' role
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'User') {
+    header("Location: " . $base_url . "/views/auth/login.php");
     exit();
 }
 
-// Fetch user information
-$username = $_SESSION['user'];
-$query = "SELECT * FROM User WHERE Username = '$username'";
+// Fetch user information from the database
+$user_id = $_SESSION['user_id'];
+$query = "SELECT * FROM User WHERE UserID = '$user_id'";
 $result = mysqli_query($conn, $query);
 
 if ($result && mysqli_num_rows($result) > 0) {
     $user_data = mysqli_fetch_assoc($result);
 } else {
-    echo "User data could not be retrieved.";
+    // Handle error if user data couldn't be retrieved
+    die("User data could not be retrieved.");
 }
 
-// Update profile if form is submitted
+// Handle form submission for profile update
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $new_name = mysqli_real_escape_string($conn, $_POST['name']);
     $new_email = mysqli_real_escape_string($conn, $_POST['email']);
-    $new_password = !empty($_POST['password']) ? password_hash($_POST['password'], PASSWORD_DEFAULT) : $user_data['PasswordHash'];
+    $new_password = !empty($_POST['password']) ? $_POST['password'] : $user_data['password'];
 
-    $update_query = "UPDATE User SET Username = '$new_name', Email = '$new_email', PasswordHash = '$new_password' WHERE Username = '$username'";
+    $update_query = "UPDATE User SET username = '$new_name', Email = '$new_email', password = '$new_password' WHERE UserID = '$user_id'";
 
     if (mysqli_query($conn, $update_query)) {
-        $_SESSION['user'] = $new_name; // Update session username
-        echo "Profile updated successfully!";
-        header("Location: profile.php");
+        $_SESSION['username'] = $new_name; // Update session username
+        header("Location: " . $base_url . "/views/user/profile.php");
+        exit();
     } else {
-        echo "Error updating profile.";
+        // Handle error if profile update fails
+        $error_message = "Error updating profile.";
     }
 }
 ?>
@@ -47,22 +49,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </head>
 <body class="bg-gray-100 text-gray-800">
 
-    <!-- Navbar -->
-    <?php include 'templates/navbar.php'; ?>
+    <!-- Include navbar -->
+    <?php include '../../templates/navbar.php'; ?>
 
     <!-- Edit Profile Form -->
     <div class="container mx-auto py-16">
         <div class="bg-white p-8 rounded-lg shadow-lg max-w-md mx-auto">
             <h1 class="text-3xl font-bold text-green-700 mb-6">Edit Your Profile</h1>
 
-            <form action="edit_profile.php" method="POST">
+            <?php if (isset($error_message)): ?>
+                <p class="text-red-500 mb-4"><?php echo $error_message; ?></p>
+            <?php endif; ?>
+
+            <form action="<?php echo $base_url; ?>/views/user/edit_profile.php" method="POST">
                 <div class="mb-4">
                     <label for="name" class="block text-gray-700">Full Name</label>
-                    <input type="text" id="name" name="name" value="<?php echo $user_data['Username']; ?>" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" required>
+                    <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($user_data['username']); ?>" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" required>
                 </div>
                 <div class="mb-4">
                     <label for="email" class="block text-gray-700">Email</label>
-                    <input type="email" id="email" name="email" value="<?php echo $user_data['Email']; ?>" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" required>
+                    <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($user_data['Email']); ?>" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" required>
                 </div>
                 <div class="mb-4">
                     <label for="password" class="block text-gray-700">Password (Leave blank to keep current password)</label>
@@ -73,8 +79,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
     </div>
 
-    <!-- Footer -->
-    <?php include 'templates/footer.php'; ?>
+    <!-- Include footer -->
+    <?php include '../../templates/footer.php'; ?>
 
 </body>
 </html>

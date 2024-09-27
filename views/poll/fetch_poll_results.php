@@ -1,24 +1,38 @@
 <?php
+// Include the configuration file
 include '../../includes/config.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $pollID = $_GET['pollID'];
+// Check if a poll ID is provided in the GET request
+if (isset($_GET['pollID'])) {
+    // Sanitize the input to prevent SQL injection
+    $pollID = mysqli_real_escape_string($conn, $_GET['pollID']);
 
-    // Fetch total votes
-    $queryTotalVotes = "SELECT SUM(VoteCount) as totalVotes FROM PollOption WHERE PollID = $pollID";
-    $resultTotalVotes = mysqli_query($conn, $queryTotalVotes);
-    $totalVotes = mysqli_fetch_assoc($resultTotalVotes)['totalVotes'];
+    // Prepare the SQL query to fetch poll results
+    $query = "SELECT PollOption.OptionID, PollOption.OptionText, COUNT(Vote.VoteID) as Votes
+              FROM PollOption
+              LEFT JOIN Vote ON PollOption.OptionID = Vote.OptionID
+              WHERE PollOption.PollID = $pollID
+              GROUP BY PollOption.OptionID";
 
-    // Fetch poll options and their vote counts
-    $queryOptions = "SELECT OptionID, VoteCount FROM PollOption WHERE PollID = $pollID";
-    $resultOptions = mysqli_query($conn, $queryOptions);
+    // Execute the query
+    $result = mysqli_query($conn, $query);
 
     $pollResults = [];
-    while ($row = mysqli_fetch_assoc($resultOptions)) {
-        $percentage = ($totalVotes > 0) ? round(($row['VoteCount'] / $totalVotes) * 100) : 0;
-        $pollResults[$row['OptionID']] = $percentage;
+    $totalVotes = 0;
+
+    // Process the query results
+    while ($row = mysqli_fetch_assoc($result)) {
+        $pollResults[$row['OptionID']] = [
+            'optionText' => $row['OptionText'],
+            'votes' => $row['Votes']
+        ];
+        $totalVotes += $row['Votes'];
     }
 
-    echo json_encode(['results' => $pollResults]);
+    // Return the poll results and total votes as JSON
+    echo json_encode(['results' => $pollResults, 'totalVotes' => $totalVotes]);
+} else {
+    // Return an error message if no poll ID is provided
+    echo json_encode(['error' => 'Invalid request']);
 }
 ?>

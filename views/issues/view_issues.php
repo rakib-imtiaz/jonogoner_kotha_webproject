@@ -1,20 +1,10 @@
 <?php
+// Start the session and include the configuration file
 session_start();
 include '../../includes/config.php';
 
-// Enable error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 // Check if the user is logged in
 $isLoggedIn = isset($_SESSION['user']);
-
-// Debugging: check login status
-if ($isLoggedIn) {
-    echo "<script>console.log('User is logged in.');</script>";
-} else {
-    echo "<script>console.log('User is not logged in.');</script>";
-}
 
 // Fetch all issues from the database
 $query = "SELECT Issue.Title, Issue.Description, Issue.Location, Issue.DateSubmitted, User.Username, Category.Name AS CategoryName
@@ -22,10 +12,12 @@ $query = "SELECT Issue.Title, Issue.Description, Issue.Location, Issue.DateSubmi
           JOIN User ON Issue.SubmittedBy = User.UserID
           JOIN Category ON Issue.CategoryID = Category.CategoryID";
 
-// Debugging: check if query execution is successful
+// Execute the query
 $result = mysqli_query($conn, $query);
+
+// Check if the query execution was successful
 if (!$result) {
-    die("<script>alert('Query failed: " . mysqli_error($conn) . "');</script>");
+    die("Query failed: " . mysqli_error($conn));
 }
 
 ?>
@@ -40,9 +32,10 @@ if (!$result) {
 </head>
 <body class="bg-gray-100 text-gray-800">
 
-    <!-- Navbar -->
+    <!-- Include the header template -->
     <?php include '../../views/templates/header.php'; ?>
     <style>
+        /* Commented out background image styles */
         /* body {
             background-image: url('/assets/images/report_issues.png');
             background-size: cover;
@@ -52,7 +45,7 @@ if (!$result) {
         } */
     </style>
 
-    <!-- View Issues -->
+    <!-- View Issues Section -->
     <div style="transform:scale(0.9);" class="container mx-auto py-16">
         <h1 class="text-3xl font-bold text-red-700 mb-6">Reported Issues</h1>
 
@@ -66,11 +59,11 @@ if (!$result) {
                             <p class="text-sm text-gray-500 mt-2">Category: <?php echo $issue['CategoryName']; ?> | Location: <?php echo $issue['Location']; ?></p>
                             <p class="text-sm text-gray-500">Submitted by: <?php echo $issue['Username']; ?> on <?php echo date('Y-m-d', strtotime($issue['DateSubmitted'])); ?></p>
                             <?php if ($isLoggedIn): ?>
-                                <!-- If logged in, show interaction options -->
+                                <!-- Display interaction options for logged-in users -->
                                 <button class="bg-green-600 text-white py-2 px-4 rounded-lg">Comment</button>
                                 <button class="bg-green-600 text-white py-2 px-4 rounded-lg">Propose Solution</button>
                             <?php else: ?>
-                                <!-- If not logged in, show view-only message -->
+                                <!-- Display message for non-logged-in users -->
                                 <p class="text-sm text-red-500 italic">Log in to interact with issues.</p>
                             <?php endif; ?>
                         </li>
@@ -82,7 +75,7 @@ if (!$result) {
         </div>
     </div>
 
-    <!-- Footer -->
+    <!-- Include the footer template -->
     <?php include '../../views/templates/footer.php'; ?>
 
 </body>

@@ -1,6 +1,6 @@
--- drop database if exists jonogoner_kotha;
--- create database jonogoner_kotha;
--- use jonogoner_kotha;
+drop database if exists jonogoner_kotha;
+create database jonogoner_kotha;
+use jonogoner_kotha;
 
 
 -- Disable foreign key checks before dropping tables
@@ -194,9 +194,9 @@ CREATE TABLE Message (
 -- Insert data into User table
 INSERT INTO User (username, password, Email, Role, ProfilePicture, DateRegistered, LastLogin, LanguagePreference)
 VALUES
-('john_doe', 'hashed_password_1', 'john@example.com', 'User', 'profile1.jpg', NOW(), NOW(), 'English'),
+('john_doe', 'user1', 'user1@gmail.com', 'User', 'profile1.jpg', NOW(), NOW(), 'English'),
 ('jane_smith', 'hashed_password_2', 'jane@example.com', 'User', 'profile2.jpg', NOW(), NOW(), 'English'),
-('michael_admin', 'hashed_password_3', 'michael@example.com', 'Admin', 'profile3.jpg', NOW(), NOW(), 'English'),
+('michael_admin', 'admin', 'admin@gmail.com', 'Admin', 'profile3.jpg', NOW(), NOW(), 'English'),
 ('anna_user', 'hashed_password_4', 'anna@example.com', 'User', 'profile4.jpg', NOW(), NOW(), 'Bengali'),
 ('tom_admin', 'hashed_password_5', 'tom@example.com', 'Admin', 'profile5.jpg', NOW(), NOW(), 'Bengali');
 

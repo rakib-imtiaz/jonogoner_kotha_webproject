@@ -61,22 +61,22 @@
     <header class="nav-container">
         <nav class="container mx-auto flex items-center justify-between p-4">
             <!-- Logo -->
-            <a href="/index.php" class="flex items-center">
-                <img src="/assets/images/logo2.png" alt="Jonogoner Kotha Logo" class="h-10 w-10 mr-2">
+            <a href="<?php echo $base_url; ?>/index.php" class="flex items-center">
+                <img src="<?php echo $base_url; ?>/assets/images/logo2.png" alt="Jonogoner Kotha Logo" class="h-10 w-10 mr-2">
                 <span id="title" class="text-2xl font-bold text-green-700">Jonogoner Kotha</span>
             </a>
 
             <!-- Navigation Links -->
             <ul class="hidden md:flex space-x-6">
-                <li><a href="/views/issues/view_issues.php" class="text-gray-600 hover:text-green-700">Issues</a></li>
-                <li><a href="/views/poll/polls.php" class="text-gray-600 hover:text-green-700">Live Polls</a></li>
-                <li><a href="/views/emergency/emergency.php" class="text-gray-600 hover:text-green-700">Emergency</a></li>
+                <li><a href="<?php echo $base_url; ?>/views/issues/view_issues.php" class="text-gray-600 hover:text-green-700">Issues</a></li>
+                <li><a href="<?php echo $base_url; ?>/views/poll/polls.php" class="text-gray-600 hover:text-green-700">Live Polls</a></li>
+                <li><a href="<?php echo $base_url; ?>/views/emergency/emergency.php" class="text-gray-600 hover:text-green-700">Emergency</a></li>
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <li><a href="profile.php" class="text-gray-600 hover:text-green-700"><?php echo $_SESSION['username']; ?></a></li>
-                    <li><a href="logout.php" class="text-gray-600 hover:text-green-700">Logout</a></li>
+                    <li><a href="<?php echo $base_url; ?>/views/user/profile.php" class="text-gray-600 hover:text-green-700"><?php echo $_SESSION['username']; ?></a></li>
+                    <li><a href="<?php echo $base_url; ?>/views/auth/logout.php" class="text-gray-600 hover:text-green-700">Logout</a></li>
                 <?php else: ?>
-                    <li><a href="<?php echo '/views/auth/login.php'; ?>" class="text-gray-600 hover:text-green-700">Login</a></li>
-                    <li><a href="<?php echo '/views/auth/register.php'; ?>" class="text-gray-600 hover:text-green-700">Register</a></li>
+                    <li><a href="<?php echo $base_url; ?>/views/auth/login.php" class="text-gray-600 hover:text-green-700">Login</a></li>
+                    <li><a href="<?php echo $base_url; ?>/views/auth/register.php" class="text-gray-600 hover:text-green-700">Register</a></li>
                 <?php endif; ?>
             </ul>
 
@@ -93,16 +93,16 @@
         <!-- Mobile Menu -->
         <div id="mobile-menu" class="hidden bg-white shadow-md md:hidden">
             <ul class="space-y-4 p-4">
-                <li><a href="/views/issues/view_issues.php" class="block text-gray-600 hover:text-green-700">Issues</a></li>
-                <li><a href="/views/issues/solutions.php" class="block text-gray-600 hover:text-green-700">Solutions</a></li>
-                <li><a href="/views/poll/polls.php" class="block text-gray-600 hover:text-green-700">Live Polls</a></li>
-                <li><a href="/views/emergency/emergency.php" class="block text-gray-600 hover:text-green-700">Emergency</a></li>
+                <li><a href="<?php echo $base_url; ?>/views/issues/view_issues.php" class="block text-gray-600 hover:text-green-700">Issues</a></li>
+                <li><a href="<?php echo $base_url; ?>/views/issues/solutions.php" class="block text-gray-600 hover:text-green-700">Solutions</a></li>
+                <li><a href="<?php echo $base_url; ?>/views/poll/polls.php" class="block text-gray-600 hover:text-green-700">Live Polls</a></li>
+                <li><a href="<?php echo $base_url; ?>/views/emergency/emergency.php" class="block text-gray-600 hover:text-green-700">Emergency</a></li>
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <li><a href="profile.php" class="block text-gray-600 hover:text-green-700"><?php echo $_SESSION['username']; ?></a></li>
-                    <li><a href="logout.php" class="block text-gray-600 hover:text-green-700">Logout</a></li>
+                    <li><a href="<?php echo $base_url; ?>/profile.php" class="block text-gray-600 hover:text-green-700"><?php echo $_SESSION['username']; ?></a></li>
+                    <li><a href="<?php echo $base_url; ?>/logout.php" class="block text-gray-600 hover:text-green-700">Logout</a></li>
                 <?php else: ?>
-                    <li><a href="/views/auth/login.php" class="block text-gray-600 hover:text-green-700">Login</a></li>
-                    <li><a href="/views/auth/register.php" class="block text-gray-600 hover:text-green-700">Register</a></li>
+                    <li><a href="<?php echo $base_url; ?>/views/auth/login.php" class="block text-gray-600 hover:text-green-700">Login</a></li>
+                    <li><a href="<?php echo $base_url; ?>/views/auth/register.php" class="block text-gray-600 hover:text-green-700">Register</a></li>
                 <?php endif; ?>
             </ul>
         </div>

@@ -1,8 +1,11 @@
 <?php
-session_start();
+// Include configuration file and start session
 include '../../includes/config.php';
+session_start();
 
+// Check if the form is submitted
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Sanitize user input
     $email = mysqli_real_escape_string($conn, $_POST['email']);
     $password = mysqli_real_escape_string($conn, $_POST['password']);
 
@@ -10,18 +13,39 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $query = "SELECT * FROM User WHERE Email='$email'";
     $result = mysqli_query($conn, $query);
 
+    // Handle query execution error
+    if (!$result) {
+        die("Query failed: " . mysqli_error($conn));
+    }
+
+    // If user exists
     if (mysqli_num_rows($result) > 0) {
         $user = mysqli_fetch_assoc($result);
 
-        // // Debug: print what we fetched from the database
-        // echo "<pre>";
-        // var_dump($user);
-        // echo "</pre>";
-        // Verify password
-        if ($password == $user['password']) {
-           
-            $_SESSION['user'] = $user['Email'];
-            header("Location: .././user/profile.php");
+        // Verify password (without hashing)
+        if ($password === $user['password']) {
+            // Set session variables
+            $_SESSION['user_id'] = $user['UserID'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['role'] = $user['Role'];
+
+            // Update LastLogin
+            $updateQuery = "UPDATE User SET LastLogin = NOW() WHERE UserID = " . $user['UserID'];
+            $updateResult = mysqli_query($conn, $updateQuery);
+
+            // Handle update query execution error
+            if (!$updateResult) {
+                die("Update query failed: " . mysqli_error($conn));
+            }
+
+            // Redirect based on role
+            if ($user['Role'] == 'Admin') {
+                $redirect_url = $base_url . "/views/admin/admin_profile.php";
+            } else {
+                $redirect_url = $base_url . "/views/user/profile.php";
+            }
+
+            header("Location: $redirect_url");
             exit();
         } else {
             $error = "Incorrect password!";
@@ -38,180 +62,99 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jonogoner Kotha - Login</title>
+    <title>Login - Jonogoner Kotha</title>
+    <!-- Tailwind CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    
     <style>
-        body,
-        html {
-            margin: 50px;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-image: url('/assets/images/image.png');
+        body {
+            background-image: url('<?php echo $base_url; ?>/assets/images/image.png');
             background-size: cover;
             background-position: center;
-            background-attachment: fixed;
+            background-repeat: no-repeat;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 100px;
         }
 
         .login-container {
-            transform: scale(.95);
-
-            width: 400px;
-            background-color: rgba(255, 255, 255, 0.9);
-            /* Initial white background */
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            text-align: center;
+            transform: scale(.75);
             transition: transform 0.5s ease, background-color 2s ease, box-shadow 1s ease;
-            /* Change background-color instead */
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 450px;
         }
 
         .login-container:hover {
-            transform: scale(1.05);
-            /* Enlarge the form slightly */
+            transform: scale(.80);
             background-image: linear-gradient(135deg, green, red);
-            /* Gradient for Bangladesh flag */
-            background-color: transparent;
-            /* Transition to transparent to reveal the gradient */
             box-shadow: 0 0 20px 10px rgba(0, 255, 0, 0.7);
-            color: white;
-            /* Turn all text inside the container white */
-
-
         }
 
         .login-container:hover h1,
+        .login-container:hover label,
         .login-container:hover p,
-        .login-container:hover a,
-        .login-container:hover label {
-            color: white;
-            /* Apply white color to all text and input placeholders */
-        }
-
-
-
-
-        .login-container h1 {
-            color: #006400;
-            font-size: 2rem;
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-            text-align: left;
-        }
-
-        .form-group label {
-            font-weight: bold;
-            margin-bottom: 5px;
-            display: block;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 10px;
-            font-size: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        .form-group input[type="submit"] {
-            background-color: #006400;
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .form-group input[type="submit"]:hover {
-            background-color: #004d00;
-        }
-
-        .form-group a {
-            display: block;
-            margin-top: 10px;
-            color: #006400;
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-
-        .form-group a:hover {
-            text-decoration: underline;
-        }
-
-        .social-login {
-            margin-top: 20px;
-        }
-
-        .social-login button {
-            width: 48%;
-            padding: 10px;
-            font-size: 1rem;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-            margin: 0 1%;
-        }
-
-        .social-login button.twitter {
-            background-color: #1DA1F2;
+        .login-container:hover a {
             color: white;
         }
 
-        .social-login button.google {
-            background-color: #DB4437;
-            color: white;
+        .login-container input {
+            transition: all 0.3s ease;
         }
     </style>
 </head>
 
 <body>
+    <!-- Navbar -->
+    <?php include '../templates/header.php'; ?>
 
-<?php include '../templates/header.php';?>
+    <!-- Login Form Container -->
     <div class="login-container">
-        <h1>Jonogoner Kotha</h1>
+        <h1 class="text-2xl font-bold text-green-700 text-center mb-6">Login to Your Account</h1>
 
-        <!-- Display error message if login fails -->
         <?php if (isset($error)): ?>
-            <p style="color: red;"><?php echo $error; ?></p>
+            <p class="text-red-500 text-center mb-4"><?php echo $error; ?></p>
         <?php endif; ?>
 
-        <!-- Form submission should point to this same page with method POST -->
-        <form action="login.php" method="POST">
-            <div class="form-group">
-                <label for="email">email:</label>
-                <input style="color: black!important;" type="text" id="email" name="email" placeholder="Enter your email" required>
+        <form action="<?php echo $base_url; ?>/views/auth/login.php" method="POST">
+            <!-- Email -->
+            <div class="mb-4">
+                <label for="email" class="block text-gray-700 font-bold mb-2">Email</label>
+                <input type="email" id="email" name="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Enter your email" required>
             </div>
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input style="color: black!important; " type="password" id="password" name="password" placeholder="Enter your password" required>
+
+            <!-- Password -->
+            <div class="mb-4">
+                <label for="password" class="block text-gray-700 font-bold mb-2">Password</label>
+                <input type="password" id="password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Enter your password" required>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Login">
+
+            <!-- Remember Me -->
+            <div class="flex items-center mb-4">
+                <input type="checkbox" id="remember" name="remember" class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
+                <label for="remember" class="ml-2 block text-gray-700">Remember me</label>
             </div>
-            <div class="form-group">
-                <a href="/index.php">Go Back</a>
-            </div>
-            <div class="form-group">
-                <a href="#">Forgot Password?</a>
+
+            <!-- Submit Button -->
+            <div>
+                <button type="submit" class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-500 transition duration-300">Login</button>
             </div>
         </form>
 
-        <div class="social-login">
-            <button class="twitter">Login with Twitter</button>
-            <br>
-            <br>
-            <button class="google">Login with Google</button>
-        </div>
+        <!-- Forgot Password -->
+        <p class="text-center text-gray-600 mt-4">
+            <a href="<?php echo $base_url; ?>/views/auth/forgot_password.php" class="text-green-600 hover:text-green-500">Forgot Password?</a>
+        </p>
+
+        <!-- Don't have an account -->
+        <p class="text-center text-gray-600 mt-6">Don't have an account? <a href="<?php echo $base_url; ?>/views/auth/register.php" class="text-green-600 hover:text-green-500">Register</a></p>
     </div>
+
 </body>
-
-
 
 </html>
